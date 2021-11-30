@@ -71,7 +71,7 @@ char pathfile_tmp[200];
 //char pathfile_ped[200];
 //char pathfile_hist[200];
 char fname[200];
-char statname[200]="iact.report";
+char statname[200]="sipm.report";
 char errname[200];
 char outname[200];
 char outname_cut[200];
@@ -272,76 +272,17 @@ int main (int argc, char *argv[])
 int rt=10;
 //char fname[200];
 //FILE *fff;
-char st[200];
+//char st[200];
 FILE *fff;
-int kk=0,kkk=0;
+//int kk=0,kkk=0;
 int full=0;
 int full_bsm=0;
 int full_bsm_restart=0;
-
-//int nextfull=0;
-//int kktim=0;
 int stop=0;
-//int por=0;
-//int STOP_PROGRAM=0;
-//char st[10];
-//int cc,dd,nped;
-//float ped,sgm;
-//int stop_add=0;
-//int md_out=0;
-//int stat_iact=0;
-int out_test=0,out_full=0;
-//int all_portions;
-
-//int ped_present=0;
-//int data_present=0;
-//long long time_add;
-//float dtr=0;
-//unsigned long GlobalNum=0L;
-//int jjj=0;
-
-
-//ff111=fopen(coiname,"wt");
-//fclose(ff111);
-
-//ff111 = fopen("qq.txt","wt");
-
-/*
-int num=0;
-
-printf("Enter IACT Number (1,2,or 3)\n");
-scanf("%i",&num);
-
-	for (int clast=0;clast<NCLAST;clast++) {
-	    if (num==1) DATA[clast].IACT_num=61;
-	    if (num==2) DATA[clast].IACT_num=62;
-	    if (num==3) DATA[clast].IACT_num=63;
-	}
-*/
 
 
 
-    MODA_TREAT=0;
-    IACT_NN=1;
 
-    printf("argc=%i, argv[0]={%s}, argv[1]={%s}, argv[2]={%s}, argv[3]={%s}, argv[4]={%s}\n",
-	argc, argv[0], argv[1], argv[2], argv[3], argv[4]);
-    if (argc>1) {
-	IACT_NN = atoi(argv[1]);
-	if ( (IACT_NN<1) || (IACT_NN>5) ) {
-		printf("Wrong IACT_NN=%i\n",IACT_NN);
-		abort();
-	}
-	if (argc>2) {
-		MODA_TREAT = atoi(argv[2]);
-		if ( (MODA_TREAT<0) || (MODA_TREAT>5) ) {
-		    printf("Wrong MODA=%i\n",MODA_TREAT);
-		    abort();
-		}
-	}
-    }
-    printf("IACT_NN=%i   MODA=%i\n",IACT_NN,MODA_TREAT);
-//press_any_key();
 
 
     if ( (fftag = fopen(tagname,"r"))==NULL ) {
@@ -356,28 +297,22 @@ scanf("%i",&num);
 
 	rt = Read_Target_List (fftag, 0);  //here
 	if (rt==-10) continue;  //  end target
-//	if (rt==-1) continue;  //  not data   !!!  ПРОВЕРИТЬ!!!
-
 
 	ZeroData();
 
-
-//	if (ped_accept) GetStaticPedestal(pathout);  //  в другом файле
-
-	if (data_accept==0) fclose(ffstat);
-	if (data_accept==0) continue;
-
-
+	GlobalNum=0;
+	LocalNum=0;
+	AllEvents=0;
+	time_fin = 0;
+	time_start = 0;
 
 
 
-
-
-	fftim = fopen(timname,"wt");
-	fftimarray = fopen(timarrayname,"wt");
+//	fftim = fopen(timname,"wt");
+//	fftimarray = fopen(timarrayname,"wt");
 	fferr = fopen(errname,"at");
-	ff111 = fopen(coiname,"wt");
-	ffrate = fopen(ratename,"wt");
+//	ff111 = fopen(coiname,"wt");
+//	ffrate = fopen(ratename,"wt");
 
 	for (int clast=1;clast<NCLAST;clast++) {
 	    if ( DATA[clast].run_dir==0 ) continue;
@@ -385,12 +320,7 @@ scanf("%i",&num);
 	}
 
 
-	ZeroData();
-
-
 full=0;
-full_bsm=0;
-full_bsm_restart=0;
 	for (int clast=1;clast<NCLAST;clast++) {
 	    if ( DATA[clast].run_dir==0 ) continue;
 		DATA[clast].run=1;
@@ -400,19 +330,24 @@ full_bsm_restart=0;
 	}
 	DATA[0].por=1;
 
-//qq(full);
-//qq(full_bsm);
-//press_any_key();
 qq(200);
 	for (int clast=1;clast<NCLAST;clast++) {
 	    if ( DATA[clast].run_dir==0 ) continue;
 	    DATA[clast].run=0;
 	    DATA[clast].fdat = DATA[clast].OpenFile(DATA[clast].pathfile,&DATA[clast].por,0,&stop);
 	    ddtime = ReadData(clast);  // read_data.c
+
+qq(1);
 	    DATA[clast].dtime = ddtime;  // read_data.c
+
+printf("clast = %i   dtime=%Ld\n",clast,ddtime);
 	    if (DATA[clast].dtime>=0) {
 		DATA[clast].run=1;
 //		DATA[clast].ready=1;
+
+		DATA[0].por = DATA[clast].por;
+		ffout = OpenOutFile(pathout,DATA[0].por,2);
+
 	    }
 	    else {
 		DATA[clast].run=0;
@@ -424,235 +359,38 @@ qq(200);
 	    }
 printf("clast=%i   run_dir=%i   run=%i   stop=%i   por=%i   ddtime=%Ld\n",
 	clast,DATA[clast].run_dir,DATA[clast].run,DATA[clast].stop,DATA[clast].por,DATA[clast].dtime); 
-
 	}
-
-
-if( (lll>20171010) && (lll<20180915) ) {
-
-	for (int clast=1;clast<NCLAST;clast++) {
-	    if ( DATA[clast].run_dir==0 ) continue;
-	    DATA[clast].run=1;
-	    if (DATA[clast].por>DATA[0].por) {
-		DATA[clast].run=0;
-
-//if ( (mmm==140318) && (md==3) )
-//		DATA[clast].restart++;
-	    }
-printf("clast=%i   run_dir=%i   run=%i   stop=%i   por=%i   ddtime=%Ld   restart=%i\n",
-	clast,DATA[clast].run_dir,DATA[clast].run,DATA[clast].stop,DATA[clast].por,DATA[clast].dtime,DATA[clast].restart); 
-	};
-}
 
 qq(100);
 
-//press_any_key();
 
-	stop=0;
-//	restart=0;
-NEXT_OUT:
-	ffout=OpenOutFile(pathout,DATA[0].por,2);
-	qq(110);
-	out_test=0;
-	out_full=0;
-	for (int clast=1;clast<NCLAST;clast++) {
-	    if ( DATA[clast].run_dir==0 ) continue;
-	    out_full++;
-	    if (DATA[clast].por>DATA[0].por) out_test++;
-	}
-	if ( (out_full>0)&&(out_test==out_full) ) {
-	    fclose(ffout);
-//	    GetDinamicPedestal(pathout,DATA[0].por,1);
-	    DATA[0].por++;
-	    goto NEXT_OUT;
-	}
+stop=0;
 
 
 
 	do {
-NEW_POR:
-	    kk=0;
-	    kkk=0;
 
+		ddtime = ReadData(1);  // read_data.c
 
-//if (lll<20180530)  kkk = mini_times();
-//else
- 		kkk = Synchro_by_Number(LocalNum);
+		if (ddtime>0) {
 
+		    if (DATA[1].sidi==16640) {
 
-	    if (kkk==0) RejectNum++;
-	    else	AllEvents++;
-
-	    LocalNum++;
-
-		kk = (int)fmod(kkk,100);
-
-	    if (kkk>100)  {
-		multi[kk]++;
-		if (kk>=coin) multi4++;
-	    }
-
-if ((kk>=coin) && (kkk>100)) { 
-//if (ff111!=NULL) fprintf(ff111,"%3i\n",kk);
-	    //if (ffout!=NULL) fprintf(ffout,"%3i\n",kk);
-	    if (fftim!=NULL) fprintf(fftim,"%3i\n",kk);
-	    NeventCut++;
-}
-
-
-		key_timarray=0;
-		for (int clast=1;clast<NCLAST;clast++) {
-//	    if ( DATA[clast].run_dir==0 ) continue;
-
-		    if ( DATA[clast].stat ) {
-//printf("stat(%i)=%d\n",clast,DATA[clast].stat);
-			if ((kk>=coin) && (kkk>100)) {
-
-			    SaveAmpl(clast,ffout);
-			    SaveTime(clast,fftim);
-			    if (key_timarray==0) {
-				SaveTimArray(clast,fftimarray);
-				key_timarray=1;
-			    }
-
-			}  // coin
-
-			ddtime = ReadData(clast);  // read_data.c
-			DATA[clast].dtime = ddtime;  // read_data.c
-
-			if (DATA[clast].stop) {
-			    stop++;
-			    if (clast!=25) full_bsm--;
-			    printf("clast(%i)  stop=%i  run=%i   stop=%i  full_bsm=%i   por=%i\n",
-				clast,DATA[clast].stop,DATA[clast].run,stop,full_bsm,DATA[clast].por);
-			}
-		    }  // stat
-		}  // clast
-
-/*
-NEXT_OUT_2:
-
-qq(345);
-	out_test=0;
-	out_full=0;
-	for (int clast=1;clast<NCLAST;clast++) {
-	    if ( DATA[clast].run_dir==0 ) continue;
-	    if ( DATA[clast].stop==1 ) continue;
-	    out_full++;
-	    if (DATA[clast].por>DATA[0].por) out_test++;
-//printf("clast=%i   por=%i  por_out=%i   out_full=%i  out_test=%i   stop=%i\n",
-//clast,DATA[clast].por,DATA[0].por,out_full,out_test,DATA[clast].stop);
-	}
-
-
-	if ( (out_full>0)&&(out_test==out_full) ) {
-//press_any_key();
-	    fclose(ffout);
-//	    GetDinamicPedestal(pathout,DATA[0].por,1);
-	    DATA[0].por++;
-	    ffout=OpenOutFile(pathout,DATA[0].por,2);
-qq(222);
-	    goto NEXT_OUT_2;
-	}
-
-*/
-
-/*
-	for (int clast=1;clast<NCLAST;clast++) {
-	    if ( DATA[clast].run_dir==0 ) continue;
-	    if ( DATA[clast].stop==1 ) continue;
-	    DATA[clast].run=1;
-	    if (DATA[clast].por>DATA[0].por) {
-		DATA[clast].run=0;
-	    }
-	}
-*/
-
-	out_test=0;
-	out_full=0;
-	for (int clast=1;clast<NCLAST;clast++) {
-	    if ( DATA[clast].run_dir==0 ) continue;
-	    if ( DATA[clast].stop==1 ) continue;
-	    out_full++;
-	    if (DATA[clast].restart>restart_count) out_test++;
-//printf("clast=%2i   por=%i  por0=%i   data_restart=%i   out_full=%2i  out_test=%i   restart_count=%i   Ev=%ld   local=%ld\n",
-//clast,DATA[clast].por,DATA[0].por,DATA[clast].restart,out_full,out_test,restart_count,DATA[clast].NumEvent,LocalNum);
-
-//if (clast==20) press_any_key();
-
-	}
-	if ( (out_full>0)&&(out_test==out_full) ) {
-//press_any_key();
-		restart_count++;
-		GlobalNum+=LocalNum;
-		LocalNum=0;
-		time_full += (time_fin-time_start);
-
-
-
-		DATA[0].GetClock(time_start,&DATA[0].h,&DATA[0].m,&DATA[0].s,&DATA[0].mls,&DATA[0].mks,&DATA[0].dns);
-		fprintf(ffstat,"   Data Start at:   %02d:%02d:%02d,%03d.%03d.%03d\n",
-		    DATA[0].h,DATA[0].m,DATA[0].s,
-		    DATA[0].mls,DATA[0].mks,DATA[0].dns);
-		fprintf(fferr,"%02d:%02d:%02d,%03d.%03d.%03d  --  ",
-		    DATA[0].h,DATA[0].m,DATA[0].s,
-		    DATA[0].mls,DATA[0].mks,DATA[0].dns);
-		DATA[0].GetClock(time_fin,&DATA[0].h,&DATA[0].m,&DATA[0].s,&DATA[0].mls,&DATA[0].mks,&DATA[0].dns);
-		fprintf(ffstat,"   Data Stop at:    %02d:%02d:%02d,%03d.%03d.%03d",
-		    DATA[0].h,DATA[0].m,DATA[0].s,
-		    DATA[0].mls,DATA[0].mks,DATA[0].dns);
-		fprintf(ffstat,"      dtime=%.2fs\n",(float)(time_fin-time_start)/1.E+9);
-		fprintf(fferr,"%02d:%02d:%02d,%03d.%03d.%03d     ",
-		    DATA[0].h,DATA[0].m,DATA[0].s,
-		    DATA[0].mls,DATA[0].mks,DATA[0].dns);
-		fprintf(fferr,"dtime=%.2fs\n",(float)(time_fin-time_start)/1.E+9);
-
-		fprintf(ffstat,"   Restart %i:   (por=%i)\n",restart_count,DATA[0].por);
-		fprintf(fferr,"   Restart %i:   (por=%i)\n",restart_count,DATA[0].por);
-		printf("   Restart %i:   (por=%i)\n",restart_count,DATA[0].por);
-		time_fin=0;
-		time_start=0;
-	    for (int clast=1;clast<NCLAST;clast++) {
-	        if ( DATA[clast].run_dir==0 ) continue;
-		if ( DATA[clast].stop==1 ) continue;
-	        DATA[clast].NumEvent_prim=0;
-//		if (DATA[clast].por>DATA[0].por) {
-//		    DATA[clast].restart=restart_count+1;
-printf("clast=%2i   por=%i  por0=%i  restart_coun=%i   data_restart=%i\n",
-clast,DATA[clast].por,DATA[0].por,restart_count,DATA[clast].restart);
-//		}
-	    }
-	    for (int clast=1;clast<NCLAST;clast++) {
-	        if ( DATA[clast].run_dir==0 ) continue;
-		if ( DATA[clast].stop==1 ) continue;
-		DATA[clast].run=1;
-		if ( DATA[clast].por>DATA[0].por ) {
-		    DATA[clast].run=0;
-
-//if ( (mmm!=140318) && (md!=3) ) 
-		    DATA[clast].restart++;
+			GlobalNum=DATA[1].NumEvent;
+			LocalNum=DATA[1].NumEvent;
+			AllEvents++;
+		    }
+		    time_fin = DATA[1].tim_fin;
+		    time_start = DATA[1].tim_start;
+		    SaveAmpl(1,ffout);
 		}
 
-printf("clast=%2i   por=%i  por0=%i  restart_coun=%i   data_restart=%i   run=%i\n",
-clast,DATA[clast].por,DATA[0].por,restart_count,DATA[clast].restart,DATA[clast].run);
-	    }
+
+	} while (ddtime>0);
+
+
+
 //press_any_key();
-	    goto NEW_POR;
-	}
-
-
-
-//printf("\n    jjj=%i    RUN=%06ld.%02d   GlobalNum=%ld   RejectNum=%ld   portions=%i\n   All Events=%ld   Nev(cut)s=%ld    dtime=%.2fs (%.2fh)   CoRate(cut)=%.3f\n",
-//jjj,mmm,md,GlobalNum,RejectNum,DATA[0].por,AllEvents,Nevent,(float)time_full,(float)time_full/3600., (float)Nevent/(float)time_full);
-//press_any_key();
-
-
-	} while(stop<full);
-//	} while ( (stop<full) && (DATA[0].por<5) );
-//	} while (stop<=full_bsm);
-//END:
-
-
 
 
 	for(int clast=1;clast<NCLAST;clast++) {
@@ -661,99 +399,13 @@ clast,DATA[clast].por,DATA[0].por,restart_count,DATA[clast].restart,DATA[clast].
 	    fclose(DATA[clast].fhdr);
 	}
 
-	GlobalNum+=LocalNum;
+//	GlobalNum+=LocalNum;
+//	time_full += (time_fin-time_start);
 	time_full += (time_fin-time_start);
 	time_full *= 1.E-9;
 
-printf("\n   RUN=%06ld.%02d   GlobalNum=%Ld   RejectNum=%Ld   portions=%i\n   All Events=%Ld   Nev(cut)s=%Ld    dtime=%.2fs (%.2fh)   CoRate(cut)=%.3f\n",
-mmm,md,GlobalNum,RejectNum,DATA[0].por,AllEvents,NeventCut,(float)time_full,(float)time_full/3600., (float)NeventCut/(float)time_full);
+	NeventCut=AllEvents;
 
-
-
-
-	GetFullData(DATA[0].por);
-
-
-//press_any_key();
-
-/*
-	for(int clast=1;clast<NCLAST-1;clast++) {
-	    if (DATA[clast].run_dir==0) continue;
-//	    if ( (DATA[clast].tim_fin>0) && (DATA[clast].tim_start>0) &&
-//		(DATA[clast].tim_fin==DATA[clast].tim_start) ) {
-//	    if ( (DATA[clast].tim_fin>0) && 
-	    if ( (time_fin-DATA[clast].tim_fin) > 100.E+9 ) {
-		fprintf(fferr,"BSM %02d  -->  Not data at %02d.%02d.%02d,%03d.%03d.%03d  to  data END\n",
-		    DATA[clast].Number,DATA[clast].h,DATA[clast].m,DATA[clast].s,
-		    DATA[clast].mls,DATA[clast].mks,DATA[clast].dns);
-	    }
-	}
-*/
-
-	kk=0;
-	for(int clast=1;clast<NCLAST-1;clast++) {
-	    if (DATA[clast].run_dir==0) continue;
-	    if (kk) continue;
-	    kk++;
-
-//	    DATA[clast].GetClock(time_start_Global,&DATA[clast].h,&DATA[clast].m,&DATA[clast].s,&DATA[clast].mls,&DATA[clast].mks,&DATA[clast].dns);
-	    DATA[clast].GetClock(time_start,&DATA[clast].h,&DATA[clast].m,&DATA[clast].s,&DATA[clast].mls,&DATA[clast].mks,&DATA[clast].dns);
-
-//		fprintf(fferr,"Data Start at %02d.%02d.%02d,%03d.%03d.%03d\n",
-//		    DATA[clast].h,DATA[clast].m,DATA[clast].s,
-//		    DATA[clast].mls,DATA[clast].mks,DATA[clast].dns);
-		fprintf(ffstat,"   Data Start at:   %02d:%02d:%02d,%03d.%03d.%03d\n",
-		    DATA[clast].h,DATA[clast].m,DATA[clast].s,
-		    DATA[clast].mls,DATA[clast].mks,DATA[clast].dns);
-
-		fprintf(fferr,"%02d:%02d:%02d,%03d.%03d.%03d  --  ",
-		    DATA[clast].h,DATA[clast].m,DATA[clast].s,
-		    DATA[clast].mls,DATA[clast].mks,DATA[clast].dns);
-//		fprintf(ffstat,"   %02d.%02d.%02d,%03d.%03d.%03d  --  ",
-//		    DATA[clast].h,DATA[clast].m,DATA[clast].s,
-//		    DATA[clast].mls,DATA[clast].mks,DATA[clast].dns);
-
-
-		    if ( (h_st==0) && (m_st==0) && (s_st==0) && (mls_st==0) && (mks_st==0) && (dns_st==0) ) {
-			h_st=DATA[clast].h;
-			m_st=DATA[clast].m;
-			s_st=DATA[clast].s;
-			mls_st=DATA[clast].mls;
-			mks_st=DATA[clast].mks;
-			dns_st=DATA[clast].dns;
-		    }
-
-
-	    DATA[clast].GetClock(time_fin,&DATA[clast].h,&DATA[clast].m,&DATA[clast].s,&DATA[clast].mls,&DATA[clast].mks,&DATA[clast].dns);
-//		fprintf(fferr,"Data Finish at %02d.%02d.%02d,%03d.%03d.%03d\n",
-//		    DATA[clast].h,DATA[clast].m,DATA[clast].s,
-//		    DATA[clast].mls,DATA[clast].mks,DATA[clast].dns);
-		fprintf(ffstat,"   Data Finish at:  %02d:%02d:%02d,%03d.%03d.%03d",
-		    DATA[clast].h,DATA[clast].m,DATA[clast].s,
-		    DATA[clast].mls,DATA[clast].mks,DATA[clast].dns);
-		fprintf(ffstat,"      dtime=%.2fs\n",(float)(time_fin-time_start)/1.E+9);
-
-		fprintf(fferr,"%02d:%02d:%02d,%03d.%03d.%03d     ",
-		    DATA[clast].h,DATA[clast].m,DATA[clast].s,
-		    DATA[clast].mls,DATA[clast].mks,DATA[clast].dns);
-		fprintf(fferr,"dtime=%.2fs\n",(float)(time_fin-time_start)/1.E+9);
-
-
-		    h_fn=DATA[clast].h;
-		    m_fn=DATA[clast].m;
-		    s_fn=DATA[clast].s;
-		    mls_fn=DATA[clast].mls;
-		    mks_fn=DATA[clast].mks;
-		    dns_fn=DATA[clast].dns;
-
-
-
-//		fprintf(ffstat,"%02d.%02d.%02d,%03d.%03d.%03d\n",
-//		    DATA[clast].h,DATA[clast].m,DATA[clast].s,
-//		    DATA[clast].mls,DATA[clast].mks,DATA[clast].dns);
-	}
-
-//	GetDinamicPedestal(pathout,DATA[0].por,1);
 
 
 printf("\n   RUN=%06ld.%02d   GlobalNum=%Ld   RejectNum=%Ld   portions=%i\n   All Events=%Ld   Nev(cut)s=%Ld    dtime=%.2fs (%.2fh)   CoRate(cut)=%.3f\n",
@@ -764,14 +416,15 @@ fprintf(ffstat,"   RUN=%06ld.%02d   GlobalNum=%Ld   RejectNum=%Ld   portions=%i\
 mmm,md,GlobalNum,RejectNum,DATA[0].por,AllEvents,NeventCut,(float)time_full,(float)time_full/3600., (float)NeventCut/(float)time_full);
 
 
-	fclose(fftim);
-	fclose(fftimarray);
+//	fclose(fftim);
+//	fclose(fftimarray);
 	fclose(fferr);
-	fclose(ffout);
-	fclose(ff111);
-	fclose(ffrate);
+//	fclose(ffout);
+//	fclose(ff111);
+//	fclose(ffrate);
 
 
+/*
 	kk=0;
 	for(int clast=1;clast<NCLAST;clast++) {
 	    if (DATA[clast].RejectEvent) kk++;
@@ -785,230 +438,13 @@ mmm,md,GlobalNum,RejectNum,DATA[0].por,AllEvents,NeventCut,(float)time_full,(flo
 	    }
 	    fclose(fff);
 	}
-
-
-//----------------  Dinamic Pedestal::
-/*
-	strcpy(fname,pathout);
-	strcat(fname,"BSM_rate.dat");
-	ffrate = fopen(fname,"w");
-	fprintf(ffrate,"por ");
-	for(int clast=1;clast<NCLAST;clast++) {
-	    fprintf(ffrate,"    #%02d",clast);
-	}
-	fprintf(ffrate,"\n");
-
-    for(int por=1;por<DATA[0].por+1;por++) {
-	for(int clast=0;clast<NCLAST;clast++) {
-		DATA[clast].Nrate=0;
-	    for(int ich=0;ich<64;ich++) {
-		for(int ig=0;ig<4101;ig++) {
-		    DATA[clast].hampl[ich][ig]=0;
-		    DATA[clast].hped[ich][ig]=0;
-		    DATA[clast].hped_max[ich][ig]=0;
-		}
-	    }
-	}
-	ffout=OpenOutFile(pathout,por,1);
-	if (ffout==NULL) continue;
-	do {
-	    kk = ReadOUTs(ffout);
-	} while (kk>0);
-	fclose(ffout);
-	GetDinamicPedestal(pathout,por,1);
-
-	fprintf(ffrate,"%3i ",por);
-	for(int clast=1;clast<NCLAST;clast++) {
-	    fprintf(ffrate,"%7i",DATA[clast].Nrate);
-	}
-	fprintf(ffrate,"\n");
-    }
-	fclose(ffrate);
-*/
-//----------------  Dinamic Pedestal::
-
-
-//press_any_key();
-
-
-//OUTs:
-//DATA[0].por=94;
-//time_full=12446;
-
-//DATA[0].por=96;
-//time_full=12693;
-
-
-
-//=====  NEW  ===
-
-RESAVE:
-
-/*
-
-if (MODA_TREAT==3) DATA[0].por=500;
-
-
-	for(int clast=0;clast<NCLAST;clast++) {
-		for(int ig=0;ig<5001;ig++) {
-		    DATA[clast].spe[ig]=0;
-		    DATA[clast].spe_clean[ig]=0;
-		}
-	}
-
-
-    fftim_cut=OpenOutFile(pathout,0,4);
-    fftimarray_cut=OpenOutFile(pathout,0,5);
-
-    for(int por=1;por<DATA[0].por+1;por++) {
-	ffout=NULL;
-	ffout=OpenOutFile(pathout,por,1);
-	if (ffout==NULL) continue;
-	ffcut=OpenOutFile(pathout,por,3);
-	ReadPedestal(pathout,por,0);
-	do {
-	    kk = CUT_and_GetSpectre(ffout);
-	} while (kk>0);
-	fclose(ffout);
-	fclose(ffcut);
-    }
-    fclose(fftim_cut);
-    fclose(fftimarray_cut);
-
-//    if (time_full==0) {
-//	printf("!!!   Error::Time full=0\n");
-//	abort();
-//    }
-
-	strcpy(fname,pathout_cut);
-	strcat(fname,"multi_cut.dat");
-	ffout = fopen(fname,"w");
-	for(int ii=1;ii<NCLAST;ii++) {
-	    fprintf(ffout,"%3i%11i\n",ii,multi_cut[ii]);
-	}
-//	fprintf(ffout,"\n{%ld}   All Events=%ld   Nev(cut)s=%ld    dtime=%.2fs(%.2fh)   CoRate(cut)=%.3f\n",mmm,AllEvents+Nevent,Nevent,(float)time_fin,(float)time_fin/3600., (float)Nevent/(float)time_fin);
-	    DATA[0].GetClock(time_start_Global,&h_st,&m_st,&s_st,&mls_st,&mks_st,&dns_st);
-	    DATA[0].GetClock(time_fin,&h_fn,&m_fn,&s_fn,&mls_fn,&mks_fn,&dns_fn);
-	fprintf(ffout,"\{%06ld.%02d}   GlobalNum=%Ld   RejectNum=%Ld   portions=%i\n   All Events=%Ld   Nev(cut)s=%Ld    dtime=%.2fs (%.2fh)   CoRate(cut)=%.3f\n",
-		mmm,md,GlobalNum,RejectNum,DATA[0].por,AllEvents,NeventCut,(float)time_full,(float)time_full/3600., (float)NeventCut/(float)time_full);
-	fprintf(ffout,"%02d:%02d:%02d,%03d.%03d.%03d   --   %02d:%02d:%02d,%03d.%03d.%03d\n",
-		h_st,m_st,s_st,mls_st,mks_st,dns_st,
-		h_fn,m_fn,s_fn,mls_fn,mks_fn,dns_fn);
-
-	if(Test_GEO==1) fprintf(ffout,"test_duo=%ld   test_trio=%ld   test_duo_trio=%ld   test_err=%ld\n",
-		test_duo,test_trio,test_duo_trio,test_err);
-
-	fclose(ffout);
-
-
-
-
-if (MODA_TREAT==3) goto NEXT_DAY;
-
-
-
-if (MODA_TREAT==1)  {  //  full treat
-
-	strcpy(fname,pathout); strcat(fname,"spe.dat");
-	ffout = fopen(fname,"w");
-	for(int ii=0;ii<5001;ii++) {
-	    fprintf(ffout,"%5i%13i\n",ii,DATA[0].spe[ii]);
-	}
-	fclose(ffout);
-
-	strcpy(fname,pathout); strcat(fname,"spe_cl.dat");
-	ffout = fopen(fname,"w");
-	for(int ii=0;ii<5001;ii++) {
-	    fprintf(ffout,"%5i%13i\n",ii,DATA[0].spe_clean[ii]);
-	}
-	fclose(ffout);
-
-int lii=0;
-int hist[41];
-	for(int ii=0;ii<41;ii++) {
-	    hist[ii]=0;
-	}
-	hist[0] = DATA[0].spe[0];
-	for(int ii=1;ii<5001;ii++) {
-	    lii=(int)(log10(ii)*10);
-	    hist[lii] += DATA[0].spe[ii];
-//printf("ii=%i    lii=%i   hist=%i\n",ii,lii,hist[lii]);
-	}
-	strcpy(fname,pathout); strcat(fname,"spe.dif");
-	ffout = fopen(fname,"w");
-	for(int ii=0;ii<41;ii++) {
-	    fprintf(ffout,"%5.2f%13i\n",(float)ii*0.1,hist[ii]);
-	}
-	fclose(ffout);
-
-	for(int ii=40;ii>0;ii--) {
-	    hist[ii-1] = hist[ii] + hist[ii-1];
-	}
-	strcpy(fname,pathout); strcat(fname,"spe.hst");
-	ffout = fopen(fname,"w");
-	for(int ii=0;ii<41;ii++) {
-	    fprintf(ffout,"%5.2f%13i%11.2f\n",(float)ii*0.1+0.05,hist[ii],
-		(float)hist[ii]/(float)time_full);
-	}
-	fclose(ffout);
-
-
-	for(int ii=0;ii<41;ii++) {
-	    hist[ii]=0;
-	}
-	hist[0] = DATA[0].spe_clean[0];
-	for(int ii=1;ii<5001;ii++) {
-	    lii=(int)(log10(ii)*10);
-	    hist[lii] += DATA[0].spe_clean[ii];
-//printf("ii=%i    lii=%i   hist=%i\n",ii,lii,hist[lii]);
-	}
-	strcpy(fname,pathout); strcat(fname,"spe_cl.dif");
-	ffout = fopen(fname,"w");
-	for(int ii=0;ii<41;ii++) {
-	    fprintf(ffout,"%5.2f%13i\n",(float)ii*0.1,hist[ii]);
-	}
-	fclose(ffout);
-
-	for(int ii=40;ii>0;ii--) {
-	    hist[ii-1] = hist[ii] + hist[ii-1];
-	}
-	strcpy(fname,pathout); strcat(fname,"spe_cl.hst");
-	ffout = fopen(fname,"w");
-	for(int ii=0;ii<41;ii++) {
-	    fprintf(ffout,"%5.2f%13i%11.2f\n",(float)ii*0.1+0.05,hist[ii],
-		(float)hist[ii]/(float)time_full);
-	}
-	fclose(ffout);
-//press_any_key();
-
-
-	strcpy(fname,pathout); strcat(fname,"spe_det.dat");
-	ffout = fopen(fname,"w");
-	for(int ii=1;ii<5001;ii++) {
-	    fprintf(ffout,"%5i",ii);
-	    for(int id=0;id<15;id++) {
-		fprintf(ffout,"%11.2f",(float)DATA[1].spe_det[id][ii]/(float)time_full);
-	    }
-	    fprintf(ffout,"\n");
-	}
-	fclose(ffout);
-
-}  //  full treat
-
 */
 
-//=====  NEW  ===
-
-
-
-//fclose(ffstat);
-//ffstat = fopen(statname,"at");
-
-//qq(700);
 
  
 //  OUT files::
 //--------------------------------------
+
 	strcpy(fname,pathout);
 	strcat(fname,"multi.dat");
 	fff = fopen(fname,"w");
@@ -1016,7 +452,7 @@ int hist[41];
 	    fprintf(fff,"%3i%11i\n",ii,multi[ii]);
 	}
 //	fprintf(ffout,"\n{%ld}   All Events=%ld   Nev(cut)s=%ld    dtime=%.2fs(%.2fh)   CoRate(cut)=%.3f\n",mmm,AllEvents+Nevent,Nevent,(float)time_fin,(float)time_fin/3600., (float)Nevent/(float)time_fin);
-	    DATA[0].GetClock(time_start_Global,&h_st,&m_st,&s_st,&mls_st,&mks_st,&dns_st);
+	    DATA[0].GetClock(time_start,&h_st,&m_st,&s_st,&mls_st,&mks_st,&dns_st);
 	    DATA[0].GetClock(time_fin,&h_fn,&m_fn,&s_fn,&mls_fn,&mks_fn,&dns_fn);
 	fprintf(fff,"\{%06ld.%02d}   GlobalNum=%Ld   RejectNum=%Ld   portions=%i\n   All Events=%Ld   Nev(cut)s=%Ld    dtime=%.2fs (%.2fh)   CoRate(cut)=%.3f\n",
 		mmm,md,GlobalNum,RejectNum,DATA[0].por,AllEvents,NeventCut,(float)time_full,(float)time_full/3600., (float)NeventCut/(float)time_full);
@@ -1024,187 +460,13 @@ int hist[41];
 		h_st,m_st,s_st,mls_st,mks_st,dns_st,
 		h_fn,m_fn,s_fn,mls_fn,mks_fn,dns_fn);
 
-	if(Test_GEO==1) fprintf(fff,"test_duo=%ld   test_trio=%ld   test_duo_trio=%ld   test_err=%ld\n",
-		test_duo,test_trio,test_duo_trio,test_err);
+//	if(Test_GEO==1) fprintf(fff,"test_duo=%ld   test_trio=%ld   test_duo_trio=%ld   test_err=%ld\n",
+//		test_duo,test_trio,test_duo_trio,test_err);
 
 	fclose(fff);
+
 //--------------------------------------
 
-
-	strcpy(fname,pathout);
-	strcat(fname,"triggers.dat");
-	ffout = fopen(fname,"w");
-	fprintf(ffout,"  ");
-	for(int clast=1;clast<23;clast++) {
-	    fprintf(ffout,"         %02d",clast);
-	}
-	fprintf(ffout,"\n");
-	for(int ich=0;ich<64;ich+=2) {
-	    fprintf(ffout,"%02d",ich/2);
-	    for(int clast=1;clast<23;clast++) {
-		fprintf(ffout,"%11ld",DATA[clast].Trigg[ich]);
-	    }
-	    fprintf(ffout,"\n");
-	}
-	for(int ich=1;ich<64;ich+=2) {
-	    fprintf(ffout,"%02d",(ich-1)/2);
-	    for(int clast=1;clast<23;clast++) {
-		fprintf(ffout,"%11ld",DATA[clast].Trigg[ich]);
-	    }
-	    fprintf(ffout,"\n");
-	}
-	fclose(ffout);
-
-
-if (MODA_TREAT==1) {  //  full treat
-
-	strcpy(fname,pathout);
-	strcat(fname,"dead_time.dat");
-	ffout = fopen(fname,"w");
-	for(int ii=0;ii<1001;ii++) {
-	    if (NtimeMKS[ii]==0) continue;
-	    fprintf(ffout,"%5i%11i\n",ii,NtimeMKS[ii]);
-	}
-	for(int ii=0;ii<1001;ii++) {
-	    if (NtimeMLS[ii]==0) continue;
-	    fprintf(ffout,"%5i%11i\n",ii+1000,NtimeMLS[ii]);
-	}
-	fclose(ffout);
-
-
-	strcpy(fname,pathout);
-	strcat(fname,"dtime.dat");
-	ffout = fopen(fname,"w");
-	fprintf(ffout,"%.2f\n",(float)time_full);
-	fclose(ffout);
-
-	for(int clast=1;clast<NCLAST;clast++) {
-	    if (DATA[clast].run_dir==0) continue;
-	    strcpy(fname,pathout);
-	    strcat(fname,"/gist_allA/");
-	    mkdir(fname,0x41FF);
-	    sprintf(st,"%05ld",nnn );
-	    strcat(fname,st);
-	    sprintf(st,"%03d.gst",clast);
-	    strcat(fname,st);
-	    ffout = fopen(fname,"wt");
-	    for(int id=0;id<64;id++) {
-		for(int ig=0;ig<4100;ig++) {
-		    if (DATA[clast].gall[id][ig]==0) continue;
-		    fprintf(ffout,"%3i%6i%12i\n",id,ig,DATA[clast].gall[id][ig]);
-		}
-	    }
-	    fclose(ffout);
-	}
-	for(int clast=1;clast<NCLAST;clast++) {
-	    if (DATA[clast].run_dir==0) continue;
-	    strcpy(fname,pathout);
-	    strcat(fname,"/gist_ampl/");
-	    mkdir(fname,0x41FF);
-	    sprintf(st,"%05ld",nnn );
-	    strcat(fname,st);
-	    sprintf(st,"%03d.gst",clast);
-	    strcat(fname,st);
-	    ffout = fopen(fname,"wt");
-	    for(int id=0;id<64;id++) {
-		for(int ig=0;ig<4100;ig++) {
-		    if (DATA[clast].gampl[id][ig]==0) continue;
-		    fprintf(ffout,"%3i%6i%12i\n",id,ig,DATA[clast].gampl[id][ig]);
-		}
-	    }
-	    fclose(ffout);
-	}
-	for(int clast=1;clast<NCLAST;clast++) {
-	    if (DATA[clast].run_dir==0) continue;
-	    strcpy(fname,pathout);
-	    strcat(fname,"/gist_peds/");
-	    mkdir(fname,0x41FF);
-	    sprintf(st,"%05ld",nnn );
-	    strcat(fname,st);
-	    sprintf(st,"%03d.gst",clast);
-	    strcat(fname,st);
-	    ffout = fopen(fname,"wt");
-	    for(int id=0;id<64;id++) {
-		for(int ig=0;ig<4100;ig++) {
-		    if (DATA[clast].gped[id][ig]==0) continue;
-		    fprintf(ffout,"%3i%6i%12i\n",id,ig,DATA[clast].gped[id][ig]);
-		}
-	    }
-	    fclose(ffout);
-	}
-	for(int clast=1;clast<NCLAST;clast++) {
-	    if (DATA[clast].run_dir==0) continue;
-	    for(int ch=0;ch<64;ch+=2) {
-		if (DATA[clast].A12[ch][0][0]==0) continue;
-		strcpy(fname,pathout);
-		strcat(fname,"/ampl-a1a2/");
-		mkdir(fname,0x41FF);
-		sprintf(st,"%02d_",clast);
-		strcat(fname,st);
-		sprintf(st,"%02d-",ch);
-		strcat(fname,st);
-		sprintf(st,"%02d.cal",ch+1);
-		strcat(fname,st);
-		ffout = fopen(fname,"wt");
-		for(int ib=0;ib<2000;ib++) {
-		    if (DATA[clast].A12[ch][0][ib]==0) continue;
-		    if (DATA[clast].nA12[ch]<10) continue;
-		    fprintf(ffout,"%8.2f%11.2f\n",
-			DATA[clast].A12[ch][0][ib],DATA[clast].A12[ch][1][ib]);
-		}
-		fclose(ffout);
-	    }
-	}
-	for(int clast=1;clast<NCLAST;clast++) {
-	    if (DATA[clast].run_dir==0) continue;
-	    strcpy(fname,pathout);
-	    strcat(fname,"/double_triggers/");
-	    mkdir(fname,0x41FF);
-	    sprintf(st,"%05ld",nnn );
-	    strcat(fname,st);
-	    sprintf(st,"%03d.para",clast);
-	    strcat(fname,st);
-	    ffout = fopen(fname,"wt");
-	    for(int ich=0;ich<64;ich+=2) {
-		for(int jch=0;jch<64;jch+=2) {
-		    if (jch<ich) continue;
-		    fprintf(ffout,"(%02d,%02d)%11ld\n",ich/2,jch/2,DATA[clast].para[ich][jch]);
-		}
-	    }
-	    fclose(ffout);
-	}
-
-//qq(222);
-
-/*
-	for(int clast=1;clast<NCLAST;clast++) {
-//	    printf("ready=%i\n",DATA[clast].ready);
-	    if (DATA[clast].ready==0) continue;
-	    strcpy(fname,pathfile_hist);
-	    strcat(fname,"dtim_");
-	    sprintf(st,"%02d.dat",clast);
-	    strcat(fname,st);
-	    fhist = fopen(fname,"w");
-
-	    for(int ii=0;ii<10000;ii++) {
-		if (DATA[clast].Hist_T[ii]==0) 
-		    fprintf(fhist,"%7i%13i     0.0000\n",ii*5,DATA[clast].Hist_T[ii] );
-//		    fprintf(fhist,"%7i%13i     0.0000\n",ii,DATA[clast].Hist_T[ii] );
-		else
-		    fprintf(fhist,"%7i%13i%11.4f\n",ii*5,DATA[clast].Hist_T[ii],log10((float)DATA[clast].Hist_T[ii]) );
-//		    fprintf(fhist,"%7i%13i%11.4f\n",ii,DATA[clast].Hist_T[ii],log10((float)DATA[clast].Hist_T[ii]) );
-//		printf("St=%i  %7i  %13i\n",clast,ii,DATA[clast].Hist_T[ii]);
-	    }
-	    fclose(fhist);
-	}
-*/
-
-}  //  full treat
-
-
-
-
-NEXT_DAY:
 
 
 	fclose(ffstat);
@@ -1212,7 +474,7 @@ NEXT_DAY:
     } while(rt!=-10);
 
     fclose(fftag);
-    fclose(ffstat);
+//    fclose(ffstat);
 printf("Qu-Qu::   FINISH\n");
 return 0;
 }
@@ -1326,10 +588,10 @@ if (flag==5) {
 	if (mmm!=mmm_add) ftmp = fopen(timarrayname_cut,"wt");
 }
 
-	qq(109);
+//	qq(109);
 
-if (ftmp!=NULL) qq(12345);
-	qq(1091);
+//if (ftmp!=NULL) qq(12345);
+//	qq(1091);
 
 //printf("path={%s}   outfile={%s}\n",path,outname);
 return ftmp;
@@ -1746,65 +1008,6 @@ long long ddtime[NCLAST];
 	}
 
 
-if (lll<20171010) {
-	for (int clast=1;clast<NCLAST;clast++) {
-	    if ( DATA[clast].run==0 ) continue;
-	    if ( DATA[clast].stat==0 ) continue;
-	    if ( (DATA[clast].add_byte[1]!=DATA[clast_maxi].add_byte[1]) ||
-		(DATA[clast].add_byte[2]!=DATA[clast_maxi].add_byte[2]) ||
-		(DATA[clast].add_byte[3]!=DATA[clast_maxi].add_byte[3]) ) {
-		printf("clast=%i   Diff bytes:   0x%02X 0x%02X 0x%02X != 0x%02X 0x%02X 0x%02X\n",
-		    clast,DATA[clast].add_byte[1],DATA[clast].add_byte[2],DATA[clast].add_byte[3],
-		    DATA[clast_maxi].add_byte[1],DATA[clast_maxi].add_byte[2],DATA[clast_maxi].add_byte[3]);
-printf("clast=%2i   por=%i   Nevent=%Ld\n",clast,DATA[clast].por,DATA[clast].NumEvent);
-		press_any_key();
-	    }
-	}
-}
-if ( (lll>20171010) && (lll<20190900) )  {
-	for (int clast=1;clast<NCLAST;clast++) {
-	    if ( DATA[clast].run==0 ) continue;
-	    if ( DATA[clast].stat==0 ) continue;
-	    if ( (DATA[clast].add_byte[0]!=DATA[clast_maxi].add_byte[0]) ||
-		(DATA[clast].add_byte[1]!=DATA[clast_maxi].add_byte[1]) ||
-		(DATA[clast].add_byte[2]!=DATA[clast_maxi].add_byte[2]) ) {
-		printf("clast=%i   Diff bytes:   0x%02X 0x%02X 0x%02X != 0x%02X 0x%02X 0x%02X\n",
-		    clast,DATA[clast].add_byte[0],DATA[clast].add_byte[1],DATA[clast].add_byte[2],
-		    DATA[clast_maxi].add_byte[0],DATA[clast_maxi].add_byte[1],DATA[clast_maxi].add_byte[2]);
-printf("clast=%2i   por=%i   Nevent=%Ld\n",clast,DATA[clast].por,DATA[clast].NumEvent);
-		press_any_key();
-	    }
-	}
-}
-
-if ( (lll>20170900) && (lll<20180530) ) {
-	for (int clast=1;clast<NCLAST;clast++) {
-	    if ( DATA[clast].run==0 ) continue;
-	    if ( DATA[clast].stat==0 ) continue;
-	    if (  (ddtime[clast_maxi]-ddtime[clast])>100L) {
-		fprintf(fferr,"BSM#%02d  por=%i  NumEvent=%Ld  Change time:  %02d:%02d:%02d,%03d.%03d.%03d -> %02d:%02d:%02d,%03d.%03d.%03d\n",
-		    DATA[clast].Number,DATA[clast].por,DATA[clast].NumEvent,
-		    DATA[clast].h,DATA[clast].m,DATA[clast].s,
-		    DATA[clast].mls,DATA[clast].mks,DATA[clast].dns,
-		    DATA[clast_maxi].h,DATA[clast_maxi].m,DATA[clast_maxi].s,
-		    DATA[clast_maxi].mls,DATA[clast_maxi].mks,DATA[clast_maxi].dns);
-		printf("BSM#%02d  por=%i  NumEvent=%Ld  Change time:  %02d:%02d:%02d,%03d.%03d.%03d -> %02d:%02d:%02d,%03d.%03d.%03d\n",
-		    DATA[clast].Number,DATA[clast].por,DATA[clast].NumEvent,
-		    DATA[clast].h,DATA[clast].m,DATA[clast].s,
-		    DATA[clast].mls,DATA[clast].mks,DATA[clast].dns,
-		    DATA[clast_maxi].h,DATA[clast_maxi].m,DATA[clast_maxi].s,
-		    DATA[clast_maxi].mls,DATA[clast_maxi].mks,DATA[clast_maxi].dns);
-		DATA[clast].dtime=DATA[clast_maxi].dtime;
-		DATA[clast].h=DATA[clast_maxi].h;
-		DATA[clast].m=DATA[clast_maxi].m;
-		DATA[clast].s=DATA[clast_maxi].s;
-		DATA[clast].mls=DATA[clast_maxi].mls;
-		DATA[clast].mks=DATA[clast_maxi].mks;
-		DATA[clast].dns=DATA[clast_maxi].dns;
-//press_any_key();
-	    }
-	}
-}
 
 //printf("LocalTime=%Ld   Time=%Ld   dtime=%Ld\n",LocalTime,ddtime[clast_maxi],(ddtime[clast_maxi]-LocalTime)/1000);
 	if (LocalTime>0) {
@@ -2432,8 +1635,8 @@ int res=0;
 char sst[1];
 char stt[200];
 char st[200];
-char fname[200];
-FILE *fsub;
+//char fname[200];
+//FILE *fsub;
 
 	mmm_add = mmm;
 
@@ -2572,8 +1775,8 @@ printf("kkk=%i\n",kkk);
 	sprintf(st,".%02d",md);
 	strcat(timname,st);
 	printf("timname={%s}\n",timname);
-	fftim = fopen(timname,"wt");
-	fclose(fftim);
+//	fftim = fopen(timname,"wt");
+//	fclose(fftim);
 
 //	strcpy(pathtimarray,"./tim-array/");
 	res=mkdir(pathtimarray,0x41FF);
@@ -2589,16 +1792,16 @@ printf("kkk=%i\n",kkk);
 	strcat(timarrayname,st);
 	printf("timarrayname={%s}\n",timarrayname);
 //	if (mmm!=mmm_add) {
-	    fftimarray = fopen(timarrayname,"wt");  //  разные файлы для разных ранов
-	    fclose(fftimarray);
+//	    fftimarray = fopen(timarrayname,"wt");  //  разные файлы для разных ранов
+//	    fclose(fftimarray);
 //	}
 
 	strcpy(ratename,pathout);
 	sprintf(st,"%06ld.rate",mmm);
 	strcat(ratename,st);
 	printf("ratename={%s}\n",ratename);
-	ffrate = fopen(ratename,"wt");
-	fclose(ffrate);
+//	ffrate = fopen(ratename,"wt");
+//	fclose(ffrate);
 
 	for (int clast=1;clast<NCLAST;clast++) {
 	    if (DATA[clast].run_dir==0) continue;

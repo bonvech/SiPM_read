@@ -80,15 +80,6 @@ int hped[64][4101];
 int hped_max[64][4101];
 
 
-unsigned char buf[65535]={0};
-
-int s_add=0,mls_add=0,mks_add=0,dns_add=0;
-int sidi=0;
-int NumBytes=0;
-
-
-unsigned char hd[30]={0};
-unsigned char data[40000]={0};
 
 
 
@@ -149,19 +140,18 @@ typedef struct {
 Spmt SORT[3000];
 
 
-/*
-typedef struct {
-	unsigned char hd[24];
-	unsigned char data[200];
-	long long tim;
-	int NumBytes;
-	int ampl[64];
-	float Ampl[64];
-	unsigned long NumEvent;
-//	int pls[16][1024];
-} SeventI;
-SeventI EVENT_I; 
-*/
+
+unsigned char buf[70000];
+
+int s_add,mls_add,mks_add,dns_add;
+int sidi;
+int NumBytes;
+
+
+unsigned char hd[30];
+unsigned char data[70000];
+
+
 
 //====================================================================
 
@@ -288,14 +278,11 @@ long long tim3,tim_start,tim_fin;
 //====================================================================
 long long Data::Read_SIPM(int key_add, int key)
 {
-    int kk=0;
-    int ddd=0;
-    int peds=0;
-    unsigned long Finish=0;
-    int maska_key=0;
+int kk=0;
+int ddd=0;
+unsigned long Finish=0;
 
-//	if (IACT_NN==1) Delay=1411;
-//	if (IACT_NN==2) Delay=2036;
+
 
 	err_data=0;
 
@@ -303,8 +290,8 @@ long long Data::Read_SIPM(int key_add, int key)
 
 HEADER_NEW:
 
-	for (int j=0;j<65535;j++)  { buf[j]=0; }
-	for (int j=0;j<40000;j++) { data[j]=0; }
+	for (int j=0;j<70000;j++)  { buf[j]=0; }
+	for (int j=0;j<70000;j++) { data[j]=0; }
 
     // ====   read header ===========
 
@@ -320,7 +307,7 @@ HEADER_NEW:
 	GetTime(buf+12,&h,&m,&s,&mls,&mks,&dns);
 	TimeEvent = GetDtime(0);
 
-    printf("sidi=%i  NumBytes=%i  Number=%lld\n",sidi,NumBytes,NumEvent);
+//    printf("sidi=%i  NumBytes=%i  Number=%lld\n",sidi,NumBytes,NumEvent);
 //	SaveHDR(fhdr);
 //	Errors_IACT(&err_data,&maska_key);
     // ===== end of read header  ======
@@ -376,7 +363,7 @@ DATA_NEW:
 
 	if (tim_start==0) tim_start=TimeEvent;
 	tim_fin = TimeEvent;
-    printf("Tim_start=%Ld  Tim_fin=%Ld\n",tim_start,tim_fin);
+//    printf("tim_start=%Ld  tim_fin=%Ld\n",tim_start,tim_fin);
 
 /*
     for (int ich = 0; ich < 32; ich ++) {
@@ -391,7 +378,7 @@ DATA_NEW:
     if (NumBytesCh <= 0) // goto HEADER_NEW;
         return TimeEvent;
 
-    printf("!!! sidi=%i  NumBytes=%i    NumBytesCh=%i\n",sidi,NumBytes,NumBytesCh);
+//    printf("!!! sidi=%i  NumBytes=%i    NumBytesCh=%i\n",sidi,NumBytes,NumBytesCh);
 
 
     int ibin=0;
