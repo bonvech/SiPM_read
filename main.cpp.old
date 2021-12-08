@@ -276,10 +276,9 @@ int rt=10;
 FILE *fff;
 //int kk=0,kkk=0;
 int full=0;
-//int full_bsm=0;
-//int full_bsm_restart=0;
+int full_bsm=0;
+int full_bsm_restart=0;
 int stop=0;
-int por=0;
 
 
 
@@ -315,12 +314,11 @@ int por=0;
 //	ff111 = fopen(coiname,"wt");
 //	ffrate = fopen(ratename,"wt");
 
-/*
 	for (int clast=1;clast<NCLAST;clast++) {
 	    if ( DATA[clast].run_dir==0 ) continue;
 	    DATA[clast].fhdr = fopen(DATA[clast].filehdr,"wt");
 	}
-*/
+
 
 full=0;
 	for (int clast=1;clast<NCLAST;clast++) {
@@ -333,33 +331,44 @@ full=0;
 	DATA[0].por=1;
 
 qq(200);
+	for (int clast=1;clast<NCLAST;clast++) {
+	    if ( DATA[clast].run_dir==0 ) continue;
+	    DATA[clast].run=0;
+	    DATA[clast].fdat = DATA[clast].OpenFile(DATA[clast].pathfile,&DATA[clast].por,0,&stop);
+	    ddtime = ReadData(clast);  // read_data.c
 
-    for (int clast=1;clast<NCLAST;clast++) {
+qq(1);
+	    DATA[clast].dtime = ddtime;  // read_data.c
 
-	if ( DATA[clast].run_dir==0 ) continue;
+printf("clast = %i   dtime=%Ld\n",clast,ddtime);
+	    if (DATA[clast].dtime>=0) {
+		DATA[clast].run=1;
+//		DATA[clast].ready=1;
 
-	for( int ifl=1;ifl<1001;ifl++) {
+		DATA[0].por = DATA[clast].por;
+		ffout = OpenOutFile(pathout,DATA[0].por,2);
 
-	    por = ifl;
+	    }
+	    else {
+		DATA[clast].run=0;
+//		DATA[clast].ready=0;
+		DATA[clast].stop=1;
+		full--;
+		full_bsm--;
+		full_bsm_restart--;
+	    }
+printf("clast=%i   run_dir=%i   run=%i   stop=%i   por=%i   ddtime=%Ld\n",
+	clast,DATA[clast].run_dir,DATA[clast].run,DATA[clast].stop,DATA[clast].por,DATA[clast].dtime); 
+	}
 
-	    DATA[clast].fdat = DATA[clast].OpenFile(DATA[clast].pathfile,&por,0,&stop,1);
-
-	    if ( (DATA[clast].run<0) || (DATA[clast].stop<0) ) goto END;
-
-
-
-printf("ifl=%i   stop=%i   run=%i   por=%i\n",ifl,DATA[clast].stop,DATA[clast].run,por);
-//press_any_key();
-
-
-	    if (DATA[clast].run>0) ffout = OpenOutFile(pathout,por,2);
-	    if (DATA[clast].stop>0) fclose(ffout);
-
-
-	    if (DATA[clast].stop>0) continue;
+qq(100);
 
 
-	    do {
+stop=0;
+
+
+
+	do {
 
 		ddtime = ReadData(1);  // read_data.c
 
@@ -377,15 +386,18 @@ printf("ifl=%i   stop=%i   run=%i   por=%i\n",ifl,DATA[clast].stop,DATA[clast].r
 		}
 
 
-	    } while (ddtime>0);
+	} while (ddtime>0);
 
-	    fclose(DATA[clast].fdat);
-	    fclose(ffout);
+
+
+//press_any_key();
+
+
+	for(int clast=1;clast<NCLAST;clast++) {
+	    if ( DATA[clast].run_dir==0 ) continue;
+	    if ( clast==25 ) continue;
+	    fclose(DATA[clast].fhdr);
 	}
-    }
-
-
-END:
 
 //	GlobalNum+=LocalNum;
 //	time_full += (time_fin-time_start);
@@ -1727,7 +1739,7 @@ printf("MODA=%i   res=%i    pathout={%s}\n",MODA_TREAT,res,pathout);
 	    strcat(DATA[clast].pathfile,"SIPM/");
 	    DATA[clast].Number=clast;
 	    DATA[clast].por=1;
-	    DATA[clast].fdat = DATA[clast].OpenFile(DATA[clast].pathfile,&DATA[clast].por,0,&res,0);
+	    DATA[clast].fdat = DATA[clast].OpenFile(DATA[clast].pathfile,&DATA[clast].por,0,&res);
 	    if (res<=0) {
 		DATA[clast].run=0;
 		DATA[clast].run_dir=0;
@@ -1823,7 +1835,7 @@ int stop=0;
 	    DATA[clast].TimeEvent=0L;
 	    DATA[clast].TimeEvent_prim=0L;
 	    DATA[clast].por=1;
-	    DATA[clast].fdat = DATA[clast].OpenFile(DATA[clast].pathfile, &DATA[clast].por, 0, &stop,0 );
+	    DATA[clast].fdat = DATA[clast].OpenFile(DATA[clast].pathfile, &DATA[clast].por, 0, &stop );
 	    printf("clast=%i   por=%i   stop=%i\n",clast,DATA[clast].por,stop);
 	    if (stop<=0) continue;
 	    printf("clast=%i   por=%i   stop=%i\n",clast,DATA[clast].por,stop);
@@ -1851,7 +1863,7 @@ int por=0,stop=0,max=0;
 	    por=1;
 	    stop=0;
 	    do {
-		fff = DATA[clast].OpenFile(DATA[clast].pathfile,&por,0,&stop,0);
+		fff = DATA[clast].OpenFile(DATA[clast].pathfile,&por,0,&stop);
 //	printf("clast=%i   {%s}   por=%i   stop=%i\n",clast,DATA[clast].pathfile,por,stop);
 		por++;
 		if (stop<=0) continue;

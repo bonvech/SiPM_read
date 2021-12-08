@@ -21,13 +21,18 @@ CYC:
 	}
 */
 
+	return tim1;
+
+
 	if ( tim1<0 ) { 
+
+/*
 //qq(333);
 	    fclose(DATA[clast].fdat);
 	    fclose(ffout);
 
 		DATA[clast].por++;
-		DATA[clast].fdat = DATA[clast].OpenFile(DATA[clast].pathfile,&DATA[clast].por,0,&res);
+		DATA[clast].fdat = DATA[clast].OpenFile(DATA[clast].pathfile,&DATA[clast].por,0,&res,1);
 //qq(543217);
 
 		if (res==-1000) {
@@ -43,6 +48,8 @@ CYC:
 
 	    if (tim1==-2) tim1 = DATA[clast].Read_SIPM(2,1);
 	    if (tim1==-1) tim1 = DATA[clast].Read_SIPM(0,1);
+*/
+
 	}
 
 	if (tim1>=0) {

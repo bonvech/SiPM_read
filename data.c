@@ -6,7 +6,7 @@
 #include "data_add.c"
 //====================================================================
 //====================================================================
-FILE *Data::OpenFile(char *path, int *por, int flag, int *res )
+FILE *Data::OpenFile(char *path, int *por, int flag, int *res, int mode )
 {
 FILE *fff;
 char st[100];
@@ -38,17 +38,33 @@ if (flag<10) {
 	*por=portion;
 	*res=kkk;
 	strcpy(filedata,fname);
-//printf("kkk=%i   portion=%i\n",kkk,portion);
+printf("kkk=%i   portion=%i\n",kkk,portion);
+
 
 if (kkk==-1000) {
 	    run=0;
 	    stop=1;
+
+	    if (mode==1) {
+		stop=-1000;
+		run=-1000;
+		return NULL;
+	    }
 	    return NULL;
+
+
+
 }
 
 if (kkk==0) {
 	    run=0;
 	    stop=0;
+
+	    if (mode==1) {
+		stop=1;
+		run=1;
+		return NULL;
+	    }
 
 	    portion++;
 	    if (portion<1000) goto NEW;

@@ -213,7 +213,7 @@ long long tim3,tim_start,tim_fin;
 //		int HistZero(void);
 
 		FILE *EmptyFile(char fname[], char mod[], int *res);
-		FILE *OpenFile(char *path, int *por, int flag, int *res );
+		FILE *OpenFile(char *path, int *por, int flag, int *res, int mode );
 
 //		int Errors(int flag,long long Bad, long long Realy) 
 
@@ -355,7 +355,7 @@ DATA_NEW:
 	NumEvent_prim  = NumEvent;
 	TimeEvent_prim = TimeEvent;
 
-	SaveHDR(fhdr);
+//	SaveHDR(fhdr);
 
 //	if ( RejectIACT() == 1 ) goto HEADER_NEW;
 //		memcpy(&hd,buf,24);
